@@ -120,7 +120,68 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 분석 내용�
 st.divider()
 
 # ===================================================================
-# Section 3: 추가 그래프 구역 (예정)
+# Section 3: 날짜별 10위권 일관객 총합 추이 (영역 그래프)
 # ===================================================================
-st.header("3. 추가 그래프 구역 (예정)")
+st.header("3. 날짜별 박스오피스 10위권 총 일관객수 추이")
+
+# 날짜별 10위권 일관객 합계 구하기
+daily_total = df.groupby('날짜')['일관객'].sum().reset_index()
+daily_total.columns = ['날짜', '총일관객']
+
+# 영역 그래프 생성
+fig3 = px.area(
+    daily_total,
+    x='날짜',
+    y='총일관객',
+    title="날짜별 박스오피스 TOP 10 전체 일관객 합계 추이",
+    labels={'날짜': '날짜', '총일관객': '10위권 총 관객수(명)'}
+)
+
+fig3.update_traces(
+    hovertemplate="<b>날짜:</b> %{x|%Y-%m-%d}<br><b>10위권 총 관객수:</b> %{y:,}명<extra></extra>"
+)
+
+# 총 일관객 수가 가장 컸던 날 TOP 3 구하기
+top3_days = daily_total.nlargest(3, '총일관객')
+
+# 그래프 위에 상위 3일 어노테이션(마커 및 날짜 텍스트) 추가
+for i, row in top3_days.iterrows():
+    date_str = row['날짜'].strftime('%Y-%m-%d')
+    total_val = row['총일관객']
+    
+    fig3.add_annotation(
+        x=row['날짜'],
+        y=total_val,
+        text=f"<b>TOP {top3_days.index.get_loc(i)+1}</b><br>{date_str}<br>({total_val:,}명)",
+        showarrow=True,
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=1.5,
+        arrowcolor="red",
+        ax=0,
+        ay=-45,
+        bgcolor="rgba(255, 255, 255, 0.85)",
+        bordercolor="red",
+        borderwidth=1,
+        borderpad=4
+    )
+
+fig3.update_layout(
+    xaxis_title="날짜",
+    yaxis_title="10위권 총 관객수 (명)",
+    hovermode="x unified",
+    template="plotly_white"
+)
+
+st.plotly_chart(fig3, use_container_width=True)
+
+# 이 그래프로 알 수 있는 것 (사용자 작성 구역)
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 분석 내용을 작성해 주세요)")
+
+st.divider()
+
+# ===================================================================
+# Section 4: 추가 그래프 구역 (예정)
+# ===================================================================
+st.header("4. 추가 그래프 구역 (예정)")
 st.caption("앞으로 추가될 시각화 그래프가 이 구역에 들어갈 예정입니다.")

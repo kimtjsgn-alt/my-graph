@@ -191,7 +191,7 @@ top10_stats = df.groupby('영화명').agg(
     진입일수=('날짜', 'nunique')
 ).reset_index()
 
-# 총 관객수 기준 TOP 10 추출 및 오름차순 정렬 (가로 막대그래프에서 상위 항목이 위에 위치하도록)
+# 총 관객수 기준 TOP 10 추출 및 오름차순 정렬
 top10_df = top10_stats.nlargest(10, '총관객수').sort_values('총관객수', ascending=True)
 
 # 가로 막대그래프 생성
@@ -226,7 +226,59 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 분석 내용�
 st.divider()
 
 # ===================================================================
-# Section 5: 추가 그래프 구역 (예정)
+# Section 5: 월×요일별 일관객 합계 (히트맵)
 # ===================================================================
-st.header("5. 추가 그래프 구역 (예정)")
+st.header("5. 월×요일별 관객수 분포 히트맵")
+
+# 날짜에서 월과 요일 추출
+heatmap_df = df.copy()
+heatmap_df['월'] = heatmap_df['날짜'].dt.month.astype(str) + "월"
+heatmap_df['요일_num'] = heatmap_df['날짜'].dt.dayofweek  # 월:0, 화:1, ..., 일:6
+
+day_names = {0: '월요일', 1: '화요일', 2: '수요일', 3: '목요일', 4: '금요일', 5: '토요일', 6: '일요일'}
+heatmap_df['요일'] = heatmap_df['요일_num'].map(day_names)
+
+# 월, 요일별 일관객 합계 구하기
+monthly_day_sum = heatmap_df.groupby(['월', '요일', '요일_num'])['일관객'].sum().reset_index()
+
+# 월 및 요일 순서 지정
+month_order = [f"{m}월" for m in range(1, 13) if f"{m}월" in monthly_day_sum['월'].unique()]
+day_order = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+
+# 피벗 테이블 생성 (행: 월, 열: 요일)
+pivot_df = monthly_day_sum.pivot(index='월', columns='요일', values='일관객')
+pivot_df = pivot_df.reindex(index=month_order, columns=day_order)
+
+# 히트맵 생성
+fig5 = px.imshow(
+    pivot_df,
+    labels=dict(x="요일", y="월", color="관객수 합계(명)"),
+    x=day_order,
+    y=month_order,
+    color_continuous_scale="Blues",
+    title="월×요일별 관객수 합계 히트맵",
+    text_auto=",.0f"
+)
+
+fig5.update_traces(
+    hovertemplate="<b>%{y} %{x}</b><br><b>총 관객수:</b> %{z:,}명<extra></extra>"
+)
+
+fig5.update_layout(
+    xaxis_title="요일",
+    yaxis_title="월",
+    template="plotly_white"
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+# 이 그래프로 알 수 있는 것 (사용자 작성 구역)
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 분석 내용을 작성해 주세요)")
+
+st.divider()
+
+# ===================================================================
+# Section 6: 추가 그래프 구역 (예정)
+# ===================================================================
+st.header("6. 추가 그래프 구역 (예정)")
 st.caption("앞으로 추가될 시각화 그래프가 이 구역에 들어갈 예정입니다.")

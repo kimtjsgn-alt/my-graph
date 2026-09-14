@@ -181,7 +181,52 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 분석 내용�
 st.divider()
 
 # ===================================================================
-# Section 4: 추가 그래프 구역 (예정)
+# Section 4: 기간 내 총 관객수 TOP 10 영화 (가로 막대그래프)
 # ===================================================================
-st.header("4. 추가 그래프 구역 (예정)")
+st.header("4. 기간 내 총 관객수 TOP 10 영화")
+
+# 영화별 총 관객수 합계 및 10위권 진입 일수 계산
+top10_stats = df.groupby('영화명').agg(
+    총관객수=('일관객', 'sum'),
+    진입일수=('날짜', 'nunique')
+).reset_index()
+
+# 총 관객수 기준 TOP 10 추출 및 오름차순 정렬 (가로 막대그래프에서 상위 항목이 위에 위치하도록)
+top10_df = top10_stats.nlargest(10, '총관객수').sort_values('총관객수', ascending=True)
+
+# 가로 막대그래프 생성
+fig4 = px.bar(
+    top10_df,
+    x='총관객수',
+    y='영화명',
+    orientation='h',
+    title="기간 내 총 관객수 TOP 10 영화 (10위권 진입 일수 포함)",
+    labels={'총관객수': '총 관객수(명)', '영화명': '영화 제목', '진입일수': '10위권 진입 일수'},
+    hover_data={'총관객수': ':,d', '진입일수': True, '영화명': False},
+    text='총관객수'
+)
+
+fig4.update_traces(
+    texttemplate='%{x:,}명',
+    textposition='outside',
+    hovertemplate="<b>영화명:</b> %{y}<br><b>총 관객수:</b> %{x:,}명<br><b>10위권 진입 일수:</b> %{customdata[0]}일<extra></extra>"
+)
+
+fig4.update_layout(
+    xaxis_title="총 관객수 (명)",
+    yaxis_title="영화 제목",
+    template="plotly_white"
+)
+
+st.plotly_chart(fig4, use_container_width=True)
+
+# 이 그래프로 알 수 있는 것 (사용자 작성 구역)
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 분석 내용을 작성해 주세요)")
+
+st.divider()
+
+# ===================================================================
+# Section 5: 추가 그래프 구역 (예정)
+# ===================================================================
+st.header("5. 추가 그래프 구역 (예정)")
 st.caption("앞으로 추가될 시각화 그래프가 이 구역에 들어갈 예정입니다.")

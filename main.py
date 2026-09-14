@@ -19,7 +19,7 @@ def load_data():
     url = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis_daily.csv"
     df = pd.read_csv(url)
     
-    # 여덟 자리 숫자 날짜(YYYYMMDD)를 datetime 객체로 변환
+    # 8자리 숫자 형식을 실제 날짜 타입(YYYY-MM-DD)으로 변환
     df['날짜'] = pd.to_datetime(df['날짜'].astype(str), format='%Y%m%d')
     
     # 수치형 데이터 변환
@@ -37,11 +37,11 @@ except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
     st.stop()
 
-# 사이드바 안내
+# 사이드바
 st.sidebar.title("📌 안내")
 st.sidebar.info(
-    "이 앱은 1년치(365일) 일별 박스오피스 10위권 기록 데이터를 기반으로 "
-    "시간에 따른 영화 데이터 변화를 시각화합니다."
+    "1년치(365일) 일별 박스오피스 데이터를 바탕으로 "
+    "시간 흐름에 따른 영화 데이터를 시각화합니다."
 )
 
 # ==========================================
@@ -49,12 +49,12 @@ st.sidebar.info(
 # ==========================================
 st.header("1. 개별 영화 일별 관객수 변화")
 
-# 영화 목록 추출 및 드롭다운 선택
+# 영화 선택 드롭다운
 movie_list = sorted(df['영화명'].dropna().unique())
 selected_movie = st.selectbox("영화를 선택하세요:", movie_list)
 
 if selected_movie:
-    # 선택 영화 데이터 필터링 및 날짜순 정렬
+    # 필터링 및 날짜순 정렬
     movie_df = df[df['영화명'] == selected_movie].sort_values('날짜')
     
     # Plotly 선 그래프 생성
@@ -67,7 +67,7 @@ if selected_movie:
         labels={'날짜': '날짜', '일관객': '일일 관객수(명)'}
     )
     
-    # 마우스 오버(Hover) 시 날짜 및 관객수가 깔끔하게 표시되도록 설정
+    # 마우스 오버(Hover) 시 날짜와 관객수 표기 형식 설정
     fig1.update_traces(
         hovertemplate="<b>날짜:</b> %{x|%Y-%m-%d}<br><b>관객수:</b> %{y:,}명<extra></extra>"
     )
@@ -80,14 +80,24 @@ if selected_movie:
     
     st.plotly_chart(fig1, use_container_width=True)
 
-# 해석 문구 작성란 (직접 작성하시는 공간)
-st.caption("💡 **이 그래프로 알 수 있는 것**")
-st.info("작성할 내용을 여기에 입력하세요.")
+# ------------------------------------------
+# [해석 문구 작성 공간] 아래 st.info("") 안의 큰따옴표 사이에 직접 작성한 내용을 적으시면 됩니다.
+# ------------------------------------------
+st.markdown("##### 💡 이 그래프로 알 수 있는 것")
+st.info("")  # <-- 따옴표 안에 작성할 문구를 입력하세요.
 
 st.markdown("---")
 
+
 # ==========================================
-# 구역 2: [추가 그래프 영역] (향후 확장용)
+# 구역 2: [추가 그래프 구역]
 # ==========================================
 st.header("2. [추가 그래프 구역]")
-st.write("앞으로 시간에 따른 추가적인 시각화 그래프가 이 구역에 추가될 예정입니다.")
+
+# ※ 새로운 그래프를 추가할 때 아래 형식을 복사해서 사용하세요.
+# fig2 = px.bar(...)
+# st.plotly_chart(fig2, use_container_width=True)
+# st.markdown("##### 💡 이 그래프로 알 수 있는 것")
+# st.info("")
+
+st.write("새로운 그래프가 이 구역에 추가될 예정입니다.")

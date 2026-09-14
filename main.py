@@ -80,24 +80,63 @@ if selected_movie:
     
     st.plotly_chart(fig1, use_container_width=True)
 
-# ------------------------------------------
-# [해석 문구 작성 공간] 아래 st.info("") 안의 큰따옴표 사이에 직접 작성한 내용을 적으시면 됩니다.
-# ------------------------------------------
+# 해석 문구 작성 공간
 st.markdown("##### 💡 이 그래프로 알 수 있는 것")
-st.info("")  # <-- 따옴표 안에 작성할 문구를 입력하세요.
+st.info("")  # <-- 작성할 문구를 따옴표 안에 적으세요.
 
 st.markdown("---")
 
 
 # ==========================================
-# 구역 2: [추가 그래프 구역]
+# 구역 2: 일관객 합계 상위 5개 영화 비교
 # ==========================================
-st.header("2. [추가 그래프 구역]")
+st.header("2. 기간 내 일관객 합계 Top 5 영화 비교")
 
-# ※ 새로운 그래프를 추가할 때 아래 형식을 복사해서 사용하세요.
-# fig2 = px.bar(...)
-# st.plotly_chart(fig2, use_container_width=True)
-# st.markdown("##### 💡 이 그래프로 알 수 있는 것")
-# st.info("")
+# 1. 일관객 합계 상위 5개 영화 선별
+top5_movies = (
+    df.groupby('영화명')['일관객']
+    .sum()
+    .nlargest(5)
+    .index
+    .tolist()
+)
 
-st.write("새로운 그래프가 이 구역에 추가될 예정입니다.")
+# 2. Top 5 영화 데이터 필터링
+top5_df = df[df['영화명'].isin(top5_movies)].sort_values('날짜')
+
+# 3. 선 그래프 생성 (color='영화명'으로 영화별 색 구분)
+fig2 = px.line(
+    top5_df,
+    x='날짜',
+    y='일관객',
+    color='영화명',
+    title="일관객 합계 Top 5 영화의 날짜별 일관객수 추이 비교",
+    labels={'날짜': '날짜', '일관객': '일일 관객수(명)', '영화명': '영화 제목'}
+)
+
+# 마우스 오버 및 레이아웃 설정
+fig2.update_traces(
+    hovertemplate="<b>%{fullData.name}</b><br>날짜: %{x|%Y-%m-%d}<br>관객수: %{y:,}명<extra></extra>"
+)
+fig2.update_layout(
+    xaxis_title="날짜",
+    yaxis_title="일관객수 (명)",
+    legend_title_text="영화 제목 (클릭하여 켜기/끄기)",
+    hovermode="x unified",
+    template="plotly_white"
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+
+# 해석 문구 작성 공간
+st.markdown("##### 💡 이 그래프로 알 수 있는 것")
+st.info("")  # <-- 작성할 문구를 따옴표 안에 적으세요.
+
+st.markdown("---")
+
+
+# ==========================================
+# 구역 3: [추가 그래프 구역]
+# ==========================================
+st.header("3. [추가 그래프 구역]")
+st.write("다음 시각화 그래프가 이 구역에 추가될 예정입니다.")
